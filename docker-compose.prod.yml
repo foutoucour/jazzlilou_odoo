@@ -7,7 +7,7 @@ services:
       - odoo-web-data:/var/lib/odoo
       - ./log:/var/log/odoo
       - ./client:/mnt/extra-addons/client
-      - ./odoo-specific.conf:/etc/odoo/odoo-specific.conf
+      - ./odoo-specific.prod.conf:/etc/odoo/odoo-specific.conf
     expose:
       - 8069
       - 8071
