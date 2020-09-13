@@ -11,9 +11,6 @@ services:
     expose:
       - 8069
       - 8071
-    ports:
-      - "8069:8069"
-      - "8071:8071"
     environment:
       - LOG_ODOO=/var/log/odoo
       - SPECIFIC_ODOO_RC=/etc/odoo/odoo-specific.conf
@@ -42,6 +39,8 @@ services:
     ports:
       - "80:80"
       - "443:443"
+      - "8069:8069"
+      - "8071:8071"
     depends_on:
       - odoo
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
