@@ -6,6 +6,7 @@ services:
       - odoo-web-data:/var/lib/odoo
       - ./log:/var/log/odoo
       - ./client:/mnt/extra-addons/client
+      - ./website_facebook_pixel:/mnt/extra-addons/website_facebook_pixel
       - ./odoo-specific.conf:/etc/odoo/odoo-specific.conf
     expose:
       - 8069

@@ -8,6 +8,12 @@
         "website",
         "website_blog",
         "contacts",
+        "project",
+        "hr_expense",
+        "sale_management",
+
+        # local modules
+        "website_facebook_pixel",
 
     ],
     "category": "Custom",
