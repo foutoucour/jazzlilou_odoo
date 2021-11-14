@@ -1,35 +1,82 @@
 version: '3'
 services:
-  odoo:
-    image: quay.io/numigi/odoo-public:12.22
-    volumes:
-      - odoo-web-data:/var/lib/odoo
-      - ./log:/var/log/odoo
-      - ./client:/mnt/extra-addons/client
-      - ./website_facebook_pixel:/mnt/extra-addons/website_facebook_pixel
-      - ./odoo-specific.conf:/etc/odoo/odoo-specific.conf
-    expose:
-      - 8069
-      - 8071
-    ports:
-      - "8069:8069"
-      - "8071:8071"
+  # odoo
+#  odoo:
+#    image: quay.io/numigi/odoo-public:12.22
+#    volumes:
+#      - odoo-web-data:/var/lib/odoo
+#      - ./log:/var/log/odoo
+#      - ./client:/mnt/extra-addons/client
+#      - ./website_facebook_pixel:/mnt/extra-addons/website_facebook_pixel
+#      - ./odoo-specific.conf:/etc/odoo/odoo-specific.conf
+#    expose:
+#      - 8069
+#      - 8071
+#    ports:
+#      - "8069:8069"
+#      - "8071:8071"
+#    environment:
+#      - LOG_ODOO=/var/log/odoo
+#      - SPECIFIC_ODOO_RC=/etc/odoo/odoo-specific.conf
+#    depends_on:
+#      - db
+#    command: odoo
+#  db:
+#    image: postgres:11.9
+#    environment:
+#      - POSTGRES_PASSWORD=odoo
+#      - POSTGRES_USER=odoo
+#      - PGDATA=/var/lib/postgresql/data/pgdata
+#    volumes:
+#      - odoo-db-data:/var/lib/postgresql/data/pgdata
+#    expose:
+#      - 5432
+
+  # WORDPRESS
+  # based on https://www.digitalocean.com/community/tutorials/how-to-install-wordpress-with-docker-compose
+  wordpress-db:
+    image: mysql:8.0
+    container_name: db
+    restart: unless-stopped
+    env_file: .env
     environment:
-      - LOG_ODOO=/var/log/odoo
-      - SPECIFIC_ODOO_RC=/etc/odoo/odoo-specific.conf
+      - MYSQL_DATABASE=wordpress
+    volumes:
+      - wordpress-db-data:/var/lib/mysql
+    command: '--default-authentication-plugin=mysql_native_password'
+
+  wordpress:
     depends_on:
       - db
-    command: odoo
-  db:
-    image: postgres:11.9
+    image: library/wordpress:5.7.2-php7.4-apache
+    container_name: wordpress
+    restart: unless-stopped
+    env_file: .env
     environment:
-      - POSTGRES_PASSWORD=odoo
-      - POSTGRES_USER=odoo
-      - PGDATA=/var/lib/postgresql/data/pgdata
+      - WORDPRESS_DB_HOST=db:3306
+      - WORDPRESS_DB_USER=$MYSQL_USER
+      - WORDPRESS_DB_PASSWORD=$MYSQL_PASSWORD
+      - WORDPRESS_DB_NAME=wordpress
     volumes:
-      - odoo-db-data:/var/lib/postgresql/data/pgdata
-    expose:
-      - 5432
+      - wordpress-web-data:/var/www/html
+    ports:
+      - "9000:80"
+#  webserver:
+#    depends_on:
+#      - wordpress
+#    image: nginx
+#    container_name: webserver
+#    restart: unless-stopped
+#    ports:
+#      - "9000:80"
+#    volumes:
+#      - wordpress:/var/www/html
+#      - ./nginx-conf:/etc/nginx/conf.d
+#      - certbot-etc:/etc/letsencrypt
+#    networks:
+#      - app-network
 volumes:
+  wordpress-web-data:
+  wordpress-db-data:
   odoo-web-data:
   odoo-db-data:
