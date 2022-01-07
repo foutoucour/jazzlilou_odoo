@@ -57,6 +57,7 @@ services:
       - WORDPRESS_DB_NAME=wordpress
     volumes:
       - wordpress-web-data:/var/www/html
+      - ./wordpress/htaccess:/var/www/html/.htaccess
     ports:
       - "9000:80"
 
