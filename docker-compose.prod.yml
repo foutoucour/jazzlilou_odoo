@@ -1,38 +1,7 @@
 version: '3'
+
 services:
-  # odoo
-  odoo:
-    image: quay.io/numigi/odoo-public:12.22
-    restart: unless-stopped
-    volumes:
-      - odoo-web-data:/var/lib/odoo
-      - ./log:/var/log/odoo
-      - ./client:/mnt/extra-addons/client
-      - ./website_facebook_pixel:/mnt/extra-addons/website_facebook_pixel
-      - ./odoo-specific.prod.conf:/etc/odoo/odoo-specific.conf
-    expose:
-      - 8069
-      - 8071
-    environment:
-      - LOG_ODOO=/var/log/odoo
-      - SPECIFIC_ODOO_RC=/etc/odoo/odoo-specific.conf
-    depends_on:
-      - db
-    command: odoo
   db:
-    image: postgres:11.9
-    restart: unless-stopped
-    environment:
-      - POSTGRES_PASSWORD=odoo
-      - POSTGRES_USER=odoo
-      - PGDATA=/var/lib/postgresql/data/pgdata
-    volumes:
-      - odoo-db-data:/var/lib/postgresql/data/pgdata
-    expose:
-      - 5432
-  # WORDPRESS
-  # based on https://www.digitalocean.com/community/tutorials/how-to-install-wordpress-with-docker-compose
-  wordpress-db:
     image: mysql:8.0
     container_name: db
     restart: unless-stopped
@@ -40,13 +9,15 @@ services:
     environment:
       - MYSQL_DATABASE=wordpress
     volumes:
-      - wordpress-db-data:/var/lib/mysql
+      - dbdata:/var/lib/mysql
     command: '--default-authentication-plugin=mysql_native_password'
+    networks:
+      - app-network
 
   wordpress:
     depends_on:
       - db
-    image: library/wordpress:5.7.2-php7.4-apache
+    image: wordpress:5.9.2-fpm-alpine
     container_name: wordpress
     restart: unless-stopped
     env_file: .env
@@ -56,43 +27,40 @@ services:
       - WORDPRESS_DB_PASSWORD=$MYSQL_PASSWORD
       - WORDPRESS_DB_NAME=wordpress
     volumes:
-      - wordpress-web-data:/var/www/html
-      - ./wordpress/htaccess:/var/www/html/.htaccess
-    ports:
-      - "9000:80"
-    expose:
-      - 9000
+      - wordpress:/var/www/html
+    networks:
+      - app-network
 
-  nginx:
-    image: nginx
+  webserver:
+    depends_on:
+      - wordpress
+    image: nginx:1.15.12-alpine
+    container_name: webserver
     restart: unless-stopped
-    volumes:
-      - ./landing_page:/etc/nginx/landing_page
-      - ./nginx/conf.d:/etc/nginx/conf.d
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./data/certbot/conf:/etc/letsencrypt
-      - ./data/certbot/www:/var/www/certbot
     ports:
       - "80:80"
-      - "443:443"
-      - "8069:8069"
-      - "8071:8071"
-      - "9000:9000"
-    depends_on:
-      - odoo
-      - wordpress
-    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
-  certbot:
-    image: certbot/certbot
-    restart: unless-stopped
     volumes:
-      - ./data/certbot/conf:/etc/letsencrypt
-      - ./data/certbot/www:/var/www/certbot
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+      - wordpress:/var/www/html
+      - ./nginx-conf:/etc/nginx/conf.d
+      - certbot-etc:/etc/letsencrypt
+    networks:
+      - app-network
+
+  certbot:
+    depends_on:
+      - webserver
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - wordpress:/var/www/html
+    command: certonly --webroot --webroot-path=/var/www/html --email ec@edithcourtial.com --agree-tos --no-eff-email --staging -d example.com -d www.example.com
+
 volumes:
-  wordpress-web-data:
-  wordpress-db-data:
-  odoo-web-data:
-  odoo-db-data:
-  certbot-conf:
-  certbot-www:
+  certbot-etc:
+  wordpress:
+  dbdata:
+
+networks:
+  app-network:
+    driver: bridge
