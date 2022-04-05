@@ -60,6 +60,8 @@ services:
       - ./wordpress/htaccess:/var/www/html/.htaccess
     ports:
       - "9000:80"
+    expose:
+      - 9000
 
   nginx:
     image: nginx
@@ -75,8 +77,10 @@ services:
       - "443:443"
       - "8069:8069"
       - "8071:8071"
+      - "9000:9000"
     depends_on:
       - odoo
+      - wordpress
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
   certbot:
     image: certbot/certbot
