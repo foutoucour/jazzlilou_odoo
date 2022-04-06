@@ -3,7 +3,6 @@ version: '3'
 services:
   db:
     image: mysql:8.0
-    container_name: db
     restart: unless-stopped
     env_file: .env
     environment:
@@ -16,7 +15,6 @@ services:
     depends_on:
       - db
     image: wordpress:5.9.2-fpm-alpine
-    container_name: wordpress
     restart: unless-stopped
     env_file: .env
     environment:
@@ -31,7 +29,6 @@ services:
     depends_on:
       - wordpress
     image: nginx:1.15.12-alpine
-    container_name: webserver
     restart: unless-stopped
     ports:
       - "80:80"
@@ -47,7 +44,6 @@ services:
     depends_on:
       - webserver
     image: certbot/certbot
-    container_name: certbot
     volumes:
       - certbot-etc:/etc/letsencrypt
       - wordpress-web-data:/var/www/html
