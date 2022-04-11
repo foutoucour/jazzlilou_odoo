@@ -48,7 +48,8 @@ services:
     volumes:
       - certbot-etc:/etc/letsencrypt
       - wordpress-web-data:/var/www/html
-    command: certonly --webroot --webroot-path=/var/www/html --email ec@edithcourtial.com --agree-tos --no-eff-email --force-renewal --staging -d edithcourtial.com -d www.edithcourtial.com
+    command: certonly --webroot --webroot-path=/var/www/html --email ec@edithcourtial.com --agree-tos --no-eff-email --force-renewal -d edithcourtial.com -d www.edithcourtial.com
+
 
 volumes:
   certbot-etc:
