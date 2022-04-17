@@ -29,6 +29,7 @@ services:
       - WORDPRESS_DB_NAME=wordpress
     volumes:
       - wordpress-web-data:/var/www/html
+      - ./wordpress/htaccess:/var/www/html/.htaccess
     expose:
       - 9000
 
