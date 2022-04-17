@@ -29,7 +29,7 @@ services:
       - WORDPRESS_DB_NAME=wordpress
     volumes:
       - wordpress-web-data:/var/www/html
-      - ./wordpress/htaccess:/var/www/html/.htaccess
+      - ./wordpress/php.ini:/usr/local/etc/php/php.ini
     expose:
       - 9000
 
