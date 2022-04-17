@@ -16,8 +16,7 @@ services:
   wordpress:
     depends_on:
       - db
-#    image: wordpress:5.9.2-fpm-alpine
-    image: library/wordpress:5.7.2-php7.4-apache
+    image: wordpress:5.9.2-fpm-alpine
     container_name: wordpress
     networks:
       - app-network
