@@ -53,6 +53,8 @@ services:
 
   certbot:
     image: certbot/certbot
+    depends_on:
+      - webserver
     restart: unless-stopped
     volumes:
       - ./data/certbot/conf:/etc/letsencrypt
