@@ -3,7 +3,7 @@
 ## Production
 
 ``` shell 
-setenv COMPOSE_FILE=docker-compose.prod.yml
+setenv COMPOSE_FILE=/srv/jazz_odoo/docker-compose.prod.yml
 docker-compose down
 docker-compose up -d
 ```
